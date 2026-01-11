@@ -1,8 +1,9 @@
 
-  # Caption Generator UI
+  # CUSHIMUSE
 
-  This is a code bundle for Caption Generator UI. The original project is available at https://www.figma.com/design/mQEHCIC6tuVLpHnAWbmOt7/Caption-Generator-UI.
+  This is a code bundle for a caption generating app for churches. This project is deployed to a
 
+  
   ## Running the code
 
   Run `npm i` to install the dependencies.
