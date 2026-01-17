@@ -62,11 +62,58 @@ export default function App() {
   Caption only — no labels, quotes, or explanations.`;
   };
 
+  // const handleGenerate = async () => {
+  //   console.log("✅ handleGenerate called!");
+  //   console.log("Form data:", { title, postType, platform, tone });
+  //   setIsLoading(true);
+  //   const prompt = buildChurchPrompt();
+  //   try {
+  //     const response = await fetch('http://localhost:3001/caption', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ prompt }),
+  //     });
+  //     console.log('Response status:', response.status);
+  //     // console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+  //     // const text = await response.text();
+  //     // console.log('Raw response:', text);
+  //     const responseBody = await response.text();
+  //     console.log('Raw response:', responseBody);
+  //     if (!response.ok) {
+  //       // Try to parse as JSON, but don't assume it is
+  //       let errorMessage = 'Failed to generate caption';
+  //       try {
+  //         const errorData = JSON.parse(responseBody);
+  //         errorMessage = errorData.error || errorMessage;
+  //       } catch (e) {
+  //         // If not JSON, use raw text (e.g., HTML error page)
+  //         errorMessage = "Server error: " + responseBody.substring(0, 100);
+  //       }
+  //       throw new Error(errorMessage);
+  //     }
+
+  //     // Parse success response
+  //     const data = JSON.parse(responseBody);
+  //     setGeneratedCaption(data.caption);
+  //     toast.success("Caption generated successfully!");
+  //   } catch (error: any) {
+  //     console.error("Generation error:", error);
+  //     toast.error(error.message || "Failed to generate caption.");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
   const handleGenerate = async () => {
-    console.log("✅ handleGenerate called!");
-    console.log("Form data:", { title, postType, platform, tone });
     setIsLoading(true);
-    const prompt = buildChurchPrompt();
+    const prompt = `Write a short, engaging social media caption for a church ministry post.
+  Platform: ${platform}
+  Post type: ${postType}
+  Tone: ${tone}
+  Title or topic: "${title}"`;
+
     try {
       const response = await fetch('http://localhost:3001/caption', {
         method: 'POST',
@@ -75,36 +122,31 @@ export default function App() {
         },
         body: JSON.stringify({ prompt }),
       });
-      console.log('Response status:', response.status);
-      // console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-      // const text = await response.text();
-      // console.log('Raw response:', text);
+
+      // ✅ Read the response body ONLY ONCE
       const responseBody = await response.text();
       console.log('Raw response:', responseBody);
-      // if (!response.ok) {
-      //   const errorData = await response.json().catch(() => ({}));
-      //   throw new Error(errorData.error || 'Failed to generate caption');
-      // }
+
       if (!response.ok) {
-        // Try to parse as JSON, but don't assume it is
+        // Try to parse error as JSON, but fall back to raw text
         let errorMessage = 'Failed to generate caption';
         try {
           const errorData = JSON.parse(responseBody);
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
-          // If not JSON, use raw text (e.g., HTML error page)
-          errorMessage = "Server error: " + responseBody.substring(0, 100);
+          // If not valid JSON, show first 100 chars
+          errorMessage = `Server error: ${responseBody.substring(0, 100)}`;
         }
         throw new Error(errorMessage);
       }
 
-      // Parse success response
+      // ✅ Parse the success response
       const data = JSON.parse(responseBody);
-      setGeneratedCaption(data.caption);
+      setGeneratedCaption(data.caption); // 👈 Now this will work!
       toast.success("Caption generated successfully!");
     } catch (error: any) {
       console.error("Generation error:", error);
-      toast.error(error.message || "Failed to generate caption.");
+      toast.error(error.message || "Failed to generate caption. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -141,8 +183,7 @@ export default function App() {
     try {
       textarea.focus();
       textarea.select();
-
-      // Try to copy using execCommand
+      // To copy generated caption to clipboard
       const successful = document.execCommand('copy');
 
       if (successful) {
@@ -246,15 +287,6 @@ export default function App() {
             </div>
 
             {/* Generate Button */}
-            {/* <Button
-              onClick={handleGenerate}
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
-              disabled={!title || !postType || !platform || !tone}
-              size="lg"
-            >
-              <Sparkles className="mr-2 h-5 w-5" />
-              Generate Caption
-            </Button> */}
             <Button
               onClick={handleGenerate}
               className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg"
@@ -310,7 +342,7 @@ export default function App() {
         </Card>
 
         <div className="text-center mt-8 text-sm text-gray-500">
-          <p>Made with ❤️ for churches and ministries</p>
+          <p>Made with love for churches and ministries</p>
         </div>
       </div>
     </div>
