@@ -1,4 +1,4 @@
-# Church Caption Generator - PWA
+# CushiMuse - PWA
 
 A Progressive Web App designed to help churches create engaging social media content for their ministries.
 
