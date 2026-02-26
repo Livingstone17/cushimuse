@@ -303,8 +303,7 @@
 //   );
 // }
 
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "./components/ui/button";
 import { Label } from "./components/ui/label";
 import {
@@ -337,6 +336,18 @@ export default function App() {
   const [generatedCaption, setGeneratedCaption] = useState("");
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // ✅ Auto tone defaults based on audience
+  useEffect(() => {
+    if (!audienceVoice) return;
+
+    const defaultToneByAudience: Record<string, string> = {
+      pastor: "inspirational",
+      youth: "joyful"
+    };
+
+    setTone(defaultToneByAudience[audienceVoice]);
+  }, [audienceVoice]);
 
   const buildChurchPrompt = () => {
     const platformLabel =
@@ -391,7 +402,7 @@ Write one short caption for ${platformLabel} about ${postTypeLabels[postType] ||
 
 Details:
 - Title or topic: "${title}"
-- Keep it 20 to 25 words
+- Keep it 35 to 40 words
 - Use active voice such as Join us, Come and experience, Gather with us
 - For Instagram or Twitter with joyful tone, add 1 emoji (🙏✨🙌) and 1 or 2 hashtags like #FaithFamily
 - Never use slang, emojis, or hashtags on Facebook or LinkedIn
@@ -409,11 +420,14 @@ Caption only. No labels, quotes, or explanations.
       const response = await fetch("http://localhost:3001/caption", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({
+          prompt,
+          platform, // ✅ explicit
+          tone      // ✅ explicit
+        })
       });
 
       const responseBody = await response.text();
-      console.log("Raw response:", responseBody);
 
       if (!response.ok) {
         let errorMessage = "Failed to generate caption";
@@ -537,10 +551,7 @@ Caption only. No labels, quotes, or explanations.
 
             <div className="space-y-2">
               <Label>Audience Voice</Label>
-              <Select
-                value={audienceVoice}
-                onValueChange={setAudienceVoice}
-              >
+              <Select value={audienceVoice} onValueChange={setAudienceVoice}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select audience voice" />
                 </SelectTrigger>
